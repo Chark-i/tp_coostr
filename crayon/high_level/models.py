@@ -18,6 +18,9 @@ class Machine(models.Model):
     def __str__(self):
         return f"{self.nom}"
 
+    def cost(self):
+        return self.prix
+
 
 class Local(models.Model):
     nom = models.CharField(max_length=100)
@@ -32,12 +35,27 @@ class Local(models.Model):
 
 
 class Siege_social(Local):
-    def __init(self):
-        pass
+    pass
 
 
 class Usine(Local):
     machines = models.ManyToManyField(Machine)
+
+    def cost(self):
+        prix_machine = 0
+        prix_terrain = 0
+        prix_total = 0
+        prix_stock = 0
+        prix_terrain = self.ville.prix_m2 * self.surface
+        for machines in self.machines.all():
+            prix_machine += machines.prix
+
+        stocks = Stock.objects.filter(usine=self)
+        for stock in stocks:
+            prix_stock += stock.objet.prix * stock.nombre
+
+        prix_total = prix_terrain + prix_machine + prix_stock
+        return prix_total
 
 
 class Objet(models.Model):
@@ -52,8 +70,7 @@ class Objet(models.Model):
 
 
 class Ressource(Objet):
-    def __init(self):
-        pass
+    pass
 
 
 class Quantite_Ressource(models.Model):
@@ -62,6 +79,10 @@ class Quantite_Ressource(models.Model):
 
     def __str__(self):
         return f"{self.ressource}"
+
+    def cost(self):
+        prix_total = self.ressource.prix * self.quantite
+        return prix_total
 
 
 class Etape(models.Model):
@@ -81,8 +102,24 @@ class Produit(Objet):
     premiere_etape = models.ForeignKey(Etape, null=True, on_delete=models.PROTECT)
 
 
+#    def approvisionnement(self, nombre_produit):
+#        if self.premiere_etape is None:
+#            print("Pas d'élément dans la liste")
+#            return
+#        else:
+#            approvisionnement = []
+#            quantite_ressource = self.premiere_etape.quantite_ressource
+#    for quantite_ressource in self.quantite_ressource.all():
+#    quantite_ressource[i] = [
+#        self.quantite_ressource.nom,
+#        self.quantite_ressource.quantite * nombre_produit,
+#    ]
+# premiere_etape = self.etape_suivante
+
+
 class Stock(models.Model):
     objet = models.ForeignKey(Ressource, on_delete=models.PROTECT)
+    usine = models.ForeignKey(Usine, on_delete=models.PROTECT)
     nombre = models.IntegerField()
 
     def __str__(self):
