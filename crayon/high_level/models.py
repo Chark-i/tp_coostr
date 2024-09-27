@@ -9,6 +9,13 @@ class Ville(models.Model):
     def __str__(self):
         return f"{self.nom}"
 
+    def json(self):
+        return {
+            "nom": self.nom,
+            "code_postal": self.code_postal,
+            "prix_m2": self.prix_m2,
+        }
+
 
 class Machine(models.Model):
     nom = models.CharField(max_length=100)
@@ -20,6 +27,9 @@ class Machine(models.Model):
 
     def cost(self):
         return self.prix
+
+    def json(self):
+        return {"nom": self.nom, "prix": self.prix, "n_serie": self.n_serie}
 
 
 class Local(models.Model):
@@ -49,13 +59,37 @@ class Usine(Local):
         prix_terrain = self.ville.prix_m2 * self.surface
         for machines in self.machines.all():
             prix_machine += machines.prix
-
         stocks = Stock.objects.filter(usine=self)
         for stock in stocks:
             prix_stock += stock.objet.prix * stock.nombre
-
         prix_total = prix_terrain + prix_machine + prix_stock
         return prix_total
+
+    def json(self):
+        return {"machines": self.machines}
+
+    def json_extended(self):
+        mach_total = []
+        for machine in self.machines.all():
+            mach = {
+                "nom": machine.nom,
+                "prix": machine.prix,
+                "n_serie": machine.n_serie,
+            }
+            mach_total.append(mach)
+
+        return {
+            "nom_usine": self.nom,
+            "ville": self.ville.json(),
+            #'ville': self.ville.nom,
+            #'code postal' : self.ville.code_postal,
+            #'prix_m2' : self.ville.prix_m2,
+            "surface": self.surface,
+            "machines": mach_total,
+        }
+
+
+# for machine in self.machines.all()
 
 
 class Objet(models.Model):
