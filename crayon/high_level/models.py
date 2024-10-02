@@ -40,6 +40,12 @@ class Local(models.Model):
     def __str__(self):
         return f"{self.nom}"
 
+    def json(self):
+        return {"nom": self.nom, "ville": self.ville.pk, "surface": self.surface}
+        # attention dans json on ne fait pas la reference a un objet
+        # ex ici ville est un objet (foreignkey) alors on utilise son identifiant
+        # et pas self. ville, donc on utilise self.ville.pk
+
     class Meta:
         abstract = True
 

@@ -18,16 +18,24 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from high_level.views import VilleDetailView
+from high_level.views import VilleDetailViewID
 from high_level.views import MachineDetailView
 from high_level.views import MachineDetailViewID
 from high_level.views import UsineDetailViewID
+from high_level.views import Siege_socialDetailViewID
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("ville/<int:pk>/", VilleDetailViewID.as_view(), name="ville-detail"),
     path("ville/<str:nom>/", VilleDetailView.as_view(), name="ville-detail"),
     path("machine/<int:pk>/", MachineDetailViewID.as_view(), name="machine-detail"),
     path("usine/<int:pk>/", UsineDetailViewID.as_view(), name="usine-detail"),
     path("machine/<str:nom>/", MachineDetailView.as_view(), name="machine-detail"),
+    path(
+        "siege_social/<int:pk>/",
+        Siege_socialDetailViewID.as_view(),
+        name="siege_social-detail",
+    ),
 ]
 
 # acceder a une ville:
