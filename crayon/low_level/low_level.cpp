@@ -3,6 +3,7 @@
 #include <cpr/cpr.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <memory>
 
 using json = nlohmann::json_abi_v3_11_3::json;
 
@@ -10,6 +11,7 @@ using json = nlohmann::json_abi_v3_11_3::json;
 
 class Ville {
 private:
+    int id;
     std::string nom;
     double code_postal;
     double prix_m2;
@@ -23,8 +25,8 @@ public:
 
   //  Ville (json q) : nom(q["nom"]), code_postal(q["code_postal"]), prix_m2(q["prix_m2"]) {};
 
-    Ville(int id) :  nom(""), code_postal(00000), prix_m2(0.0) {
-      cpr::Response r = cpr::Get(cpr::Url{"http://127.0.0.1:8000/ville/"+ std::to_string(id)});
+    Ville(int id_des) : id(0),  nom(""), code_postal(00000), prix_m2(0.0) {
+      cpr::Response r = cpr::Get(cpr::Url{"http://127.0.0.1:8000/ville/"+ std::to_string(id_des)});
 
       r.status_code;
 
@@ -38,10 +40,10 @@ public:
 
       json data = json::parse(r.text);
 
+      id = id_des;
       nom = data["nom"];
       code_postal = data["code_postal"];
       prix_m2 = data["prix_m2"];
-
     }
 
    void afficher() const {
@@ -57,7 +59,7 @@ private:
 
 public:
 
-    Machine(int id) :  nom(""), prix(0), n_serie(0) {
+    Machine(int id) {
       cpr::Response r = cpr::Get(cpr::Url{"http://127.0.0.1:8000/machine/"+ std::to_string(id)});
 
       r.status_code;
@@ -69,6 +71,8 @@ public:
 
       r.header["content-type"];
       r.text;
+
+      std::cout<<r.text<<std::endl;
 
       json data = json::parse(r.text);
 
@@ -110,13 +114,14 @@ public:
 
     r.header["content-type"];
     r.text;
-    /*
+
     json data = json::parse(r.text);
+    std::cout<<r.text<<std::endl;
 
     nom = data["nom"];
     ville = data["ville"];
     surface = data["surface"];
-    */
+
   }
 
   void afficher() const {
@@ -125,9 +130,40 @@ public:
 
 
 };
+/*
+class Usine:public Local{
+private:
+    std::unique_ptr<Ville> v;
+public:
+    Usine(int id) : Local("", "", 0), v(std::make_unique<Ville>(nullptr)) {
 
+    cpr::Response r = cpr::Get(cpr::Url{"http://127.0.0.1:8000/usine/"+ std::to_string(id)});
 
+    r.status_code;
 
+    if (r.status_code != 200) {
+      std::cout<<"erreur dans l'ouverture du lien http"<<std::endl;
+      return;
+    }
+
+    r.header["content-type"];
+    r.text;
+
+    json data = json::parse(r.text);
+    std::cout<<r.text<<std::endl;
+
+    nom = data["nom_usine"];
+    surface = data["surface"];
+    ville = data["ville"]["nom"]
+
+  }
+  void afficher() const override{
+        std::cout << "Usine: " << nom << ", Ville: " << ville << ", Surface: " << surface << std::endl;
+        v->afficher();  // Afficher les informations de la ville
+    }
+  v(std::make_unique<Ville>(data["ville"]["id"]);
+};
+*/
 
 
 int main() {
@@ -155,13 +191,16 @@ int main() {
 
     json data = json::parse(r.text);
     */
-  //  Ville v(1);
+   // Ville v(1);
 
-    //v.afficher();
+    // v.afficher();
 
-    Machine m(1);
+    //Machine m(1);
 
-    m.afficher();
+    //m.afficher();
+
+  //  Usine U(1);
+    //s.afficher();
 
     //std::cout << data << std::endl;
 
