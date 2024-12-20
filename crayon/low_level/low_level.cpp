@@ -37,13 +37,13 @@ public:
 
       r.header["content-type"];
       r.text;
-
+    //  std::cout<<r.text<<std::endl;
       json data = json::parse(r.text);
 
       id = id_des;
       nom = data["nom"];
-      code_postal = data["code_postal"];
-      prix_m2 = data["prix_m2"];
+      code_postal = data["code_postal"].get<double>();
+      prix_m2 = data["prix_m2"].get<double>();
     }
 
    void afficher() const {
@@ -53,18 +53,20 @@ public:
 
 class Machine {
 private:
+  int id;
   std::string nom;
   double prix;
   double n_serie;
 
 public:
 
-    Machine(int id) {
-      cpr::Response r = cpr::Get(cpr::Url{"http://127.0.0.1:8000/machine/"+ std::to_string(id)});
+    Machine(int id_des)  {
+      cpr::Response r = cpr::Get(cpr::Url{"http://127.0.0.1:8000/machine/"+ std::to_string(id_des)});
 
       r.status_code;
 
       if (r.status_code != 200) {
+        std::cout<<"erreur ici"<<std::endl;
         std::cout<<"erreur dans l'ouverture du lien http"<<std::endl;
         return;
       }
@@ -72,13 +74,13 @@ public:
       r.header["content-type"];
       r.text;
 
-      std::cout<<r.text<<std::endl;
+    //  std::cout<<r.text<<std::endl;
 
       json data = json::parse(r.text);
-
+      id = id_des;
       nom = data["nom"];
-      prix = data["prix"];
-      n_serie = data["n_serie"];
+      prix = data["prix"].get<double>();
+      n_serie = data["n_serie"].get<double>();
 
   }
 
@@ -120,7 +122,7 @@ public:
 
     nom = data["nom"];
     ville = data["ville"];
-    surface = data["surface"];
+    surface = data["surface"].get<double>();
 
   }
 
@@ -130,12 +132,14 @@ public:
 
 
 };
-/*
+
 class Usine:public Local{
 private:
-    std::unique_ptr<Ville> v;
+      std::vector<std::unique_ptr<Machine>> machines;
+      std::unique_ptr<Ville> ville;
+      double surface;
 public:
-    Usine(int id) : Local("", "", 0), v(std::make_unique<Ville>(nullptr)) {
+    Usine(int id) : Local("", "", 0), ville(nullptr),surface(0) {
 
     cpr::Response r = cpr::Get(cpr::Url{"http://127.0.0.1:8000/usine/"+ std::to_string(id)});
 
@@ -148,29 +152,81 @@ public:
 
     r.header["content-type"];
     r.text;
-
+  //  std::cout<<r.text<<std::endl;
     json data = json::parse(r.text);
-    std::cout<<r.text<<std::endl;
+
 
     nom = data["nom_usine"];
-    surface = data["surface"];
-    ville = data["ville"]["nom"]
+    surface = data["surface"].get<double>();
+    ville = std::make_unique<Ville>(data["ville"]["id"]);
+
+
+    for (const auto& machine_data : data["machines"]) {
+    int machine_id = machine_data["id"].get<int>();
+    machines.push_back(std::make_unique<Machine>(machine_id));
+}
 
   }
-  void afficher() const override{
-        std::cout << "Usine: " << nom << ", Ville: " << ville << ", Surface: " << surface << std::endl;
-        v->afficher();  // Afficher les informations de la ville
+
+  void afficher() const override {
+        std::cout << "Usine: Nom: " << nom << ", Surface: " << surface <<", ";
+        if (ville) ville->afficher();
+        std::cout << "Machines de cette Usine:"<<std::endl;
+        for (const auto& machine : machines) {
+            machine->afficher();
+        }
     }
-  v(std::make_unique<Ville>(data["ville"]["id"]);
 };
-*/
+
+class Objet{
+protected:
+  std::string nom;
+  double prix;
+
+public:
+  Objet(std::string n, double p) : nom(n), prix(p) {}
+  virtual void afficher() const = 0;
+
+};
+
+class Ressource : public Objet {
+public:
+    // Constructeur
+    Ressource(const std::string n, double p) : Objet(n, p) {}
+
+    // Implémentation de la méthode afficher
+    void afficher() const override {
+        std::cout << "Ressource: " << nom
+                  << ", Prix: " << prix << "€"
+                  << std::endl;
+    }
+};
+
+class Quantite_Ressource {
+private:
+    std::unique_ptr<Ressource> ressource;
+    int quantite;
+
+public:
+    // Constructeur
+    Quantite_Ressource(std::unique_ptr<Ressource> r, int q)
+        : ressource(std::move(r)), quantite(q) {}
+
+    void afficher() const {
+        std::cout << "Quantité de ";
+        ressource->afficher();
+        std::cout << "Quantité: " << quantite << std::endl;
+    }
+};
+
+
 
 
 int main() {
 
 
 
-  //  Ville v("Toulouse", "31100", 3000.0);
+  //Ville v("Toulouse", 31100, 3000.0);
 
 
 
@@ -187,20 +243,21 @@ int main() {
     r.text;
 
 
-    //std::cout << r.text << std::endl;
+    std::cout << r.text << std::endl;
 
     json data = json::parse(r.text);
     */
-   // Ville v(1);
 
-    // v.afficher();
+    //Ville v(1);
 
+    //v.afficher();
+//
     //Machine m(1);
 
     //m.afficher();
 
-  //  Usine U(1);
-    //s.afficher();
+    Usine U(1);
+    U.afficher();
 
     //std::cout << data << std::endl;
 

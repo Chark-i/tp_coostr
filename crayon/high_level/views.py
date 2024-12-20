@@ -12,7 +12,7 @@ class VilleDetailView(DetailView):
 
     def get_object(self):
         nom = self.kwargs.get("nom")
-        return get_object_or_404(Machine, nom=nom)
+        return get_object_or_404(Ville, nom=nom)
 
     def render_to_response(self, context, **response_kwargs):
         return JsonResponse(self.object.json())

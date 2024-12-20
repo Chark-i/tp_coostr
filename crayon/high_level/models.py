@@ -11,6 +11,7 @@ class Ville(models.Model):
 
     def json(self):
         return {
+            "id": self.id,
             "nom": self.nom,
             "code_postal": self.code_postal,
             "prix_m2": self.prix_m2,
@@ -29,7 +30,12 @@ class Machine(models.Model):
         return self.prix
 
     def json(self):
-        return {"nom": self.nom, "prix": self.prix, "n_serie": self.n_serie}
+        return {
+            "id": self.id,
+            "nom": self.nom,
+            "prix": self.prix,
+            "n_serie": self.n_serie,
+        }
 
 
 class Local(models.Model):
@@ -41,7 +47,7 @@ class Local(models.Model):
         return f"{self.nom}"
 
     def json(self):
-        return {"nom": self.nom, "ville": self.ville.pk, "surface": self.surface}
+        return {"nom": self.nom, "ville": self.ville.nom, "surface": self.surface}
         # attention dans json on ne fait pas la reference a un objet
         # ex ici ville est un objet (foreignkey) alors on utilise son identifiant
         # et pas self. ville, donc on utilise self.ville.pk
@@ -72,12 +78,13 @@ class Usine(Local):
         return prix_total
 
     def json(self):
-        return {"machines": self.machines}
+        return {"machines": self.machines, "ville": self.ville}
 
     def json_extended(self):
         mach_total = []
         for machine in self.machines.all():
             mach = {
+                "id": machine.id,
                 "nom": machine.nom,
                 "prix": machine.prix,
                 "n_serie": machine.n_serie,
