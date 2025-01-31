@@ -11,7 +11,7 @@ class Ville(models.Model):
 
     def json(self):
         return {
-            # "id": self.id,
+            "id": self.id,
             "nom": self.nom,
             "code_postal": self.code_postal,
             "prix_m2": self.prix_m2,
@@ -34,7 +34,7 @@ class Machine(models.Model):
 
     def json(self):
         return {
-            # "id": self.id,
+            "id": self.id,
             "nom": self.nom,
             "prix": self.prix,
             "n_serie": self.n_serie,
@@ -106,7 +106,8 @@ class Usine(Local):
             mach_total.append(mach)
 
         return {
-            "nom_usine": self.nom,
+            "id": self.id,
+            "nom": self.nom,
             "surface": self.surface,
             "ville": self.ville.json(),
             "machines": mach_total,
@@ -130,6 +131,7 @@ class Objet(models.Model):
 class Ressource(Objet):
     def json(self):
         return {
+            "id": self.id,
             "nom": self.nom,
             "prix": self.prix,
         }
@@ -153,6 +155,7 @@ class Quantite_Ressource(models.Model):
 
     def json(self):
         return {
+            "id": self.id,
             "ressource": self.ressource.nom,
             "prix": self.ressource.prix,
             "quantite": self.quantite,
@@ -181,6 +184,7 @@ class Etape(models.Model):
 
     def json(self):
         return {
+            "id": self.id,
             "nom": self.nom,
             "machine": self.machine.nom,
             "quantite_ressource": self.quantite_ressource.json(),
@@ -195,11 +199,15 @@ class Etape(models.Model):
         while current_etape:
             etapes.append(
                 {
+                    "id": current_etape.id,
                     "nom": current_etape.nom,
                     "machine": current_etape.machine.json_extended(),
                     "quantite_ressource": current_etape.quantite_ressource.json(),
                     "duree": current_etape.duree,
                     "etape_suivante": current_etape.etape_suivante.nom
+                    if current_etape.etape_suivante
+                    else None,
+                    "etape_suivante_id": current_etape.etape_suivante.id
                     if current_etape.etape_suivante
                     else None,
                 }
@@ -225,21 +233,6 @@ class Produit(Objet):
             "prix": self.prix,
             "premiere_etape": self.premiere_etape.json_extended(),
         }
-
-
-#    def approvisionnement(self, nombre_produit):
-#        if self.premiere_etape is None:
-#            print("Pas d'élément dans la liste")
-#            return
-#        else:
-#            approvisionnement = []
-#            quantite_ressource = self.premiere_etape.quantite_ressource
-#    for quantite_ressource in self.quantite_ressource.all():
-#    quantite_ressource[i] = [
-#        self.quantite_ressource.nom,
-#        self.quantite_ressource.quantite * nombre_produit,
-#    ]
-# premiere_etape = self.etape_suivante
 
 
 class Stock(models.Model):
